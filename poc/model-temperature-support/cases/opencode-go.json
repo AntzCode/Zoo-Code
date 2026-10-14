@@ -1,0 +1,22 @@
+[
+	{
+		"id": "arithmetic-answer",
+		"name": "Correct arithmetic answer",
+		"prompt": "Calculate 17 multiplied by 19. Reply with exactly `ANSWER: 323` and no other text.",
+		"maxOutputTokens": 1024,
+		"usefulResponse": {
+			"type": "regex",
+			"pattern": "^ANSWER:\\s*323[.!]?$",
+			"flags": "i"
+		}
+	},
+	{
+		"id": "subjective-blue",
+		"name": "Subjective open-ended response",
+		"prompt": "What does the color blue feel like to you? Answer freely in a few sentences. There is no single correct interpretation; choose any imagery or association that comes to mind.",
+		"maxOutputTokens": 1024,
+		"usefulResponse": {
+			"type": "non-empty-text"
+		}
+	}
+]

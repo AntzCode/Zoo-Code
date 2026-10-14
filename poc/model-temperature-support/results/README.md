@@ -1,0 +1,1 @@
+Curated findings go here; raw run output belongs in the ignored `generated/` directory. Each generated run includes a `runner.log` with the runner's console status output, `outcomes.csv`, a manifest, and redacted HTTP transcripts.

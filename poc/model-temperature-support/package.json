@@ -1,0 +1,22 @@
+{
+	"name": "model-temperature-support-poc",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@10.8.1",
+	"engines": {
+		"node": "22.23.1"
+	},
+	"scripts": {
+		"start": "tsx runner/run.ts",
+		"test": "tsx --test runner/*.test.ts",
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@inquirer/prompts": "^8.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "22.20.1",
+		"tsx": "4.22.4",
+		"typescript": "5.9.3"
+	}
+}

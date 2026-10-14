@@ -1,0 +1,3 @@
+export const DEFAULT_TEMPERATURE_VALUES = [0, 0.5, 1, 1.5, 2] as const
+export const TOP_P_COMPATIBILITY_VALUE = 0.95
+export const DEFAULT_INTER_REQUEST_DELAY_MS = 1_000
