@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"start": "tsx runner/run.ts",
+		"report": "tsx runner/report.ts",
 		"test": "tsx --test runner/*.test.ts",
 		"check-types": "tsc --noEmit"
 	},
