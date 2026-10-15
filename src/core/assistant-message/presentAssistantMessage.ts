@@ -1,3 +1,4 @@
+import { markToolRejected } from "../task/toolExecutionContext"
 import { serializeError } from "serialize-error"
 import { Anthropic } from "@anthropic-ai/sdk"
 
@@ -187,6 +188,9 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 			// Track if we've already pushed a tool result
 			let hasToolResult = false
 			const toolCallId = mcpBlock.id
+			if (toolCallId && !cline.activeToolContexts.has(toolCallId)) {
+				cline.activeToolContexts.set(toolCallId, { toolCallId, didReject: false })
+			}
 
 			// Store approval feedback to merge into tool result (GitHub #10465)
 			let approvalFeedback: { text: string; images?: string[] } | undefined
@@ -284,7 +288,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 					} else {
 						pushToolResult(formatResponse.toolDenied())
 					}
-					cline.didRejectTool = true
+					markToolRejected(cline, toolCallId ?? "")
 					return false
 				}
 
@@ -409,6 +413,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 				askApproval,
 				handleError,
 				pushToolResult,
+				toolCallId: toolCallId ?? "",
 				onValidated: mcpBlock.partial
 					? undefined
 					: () => {
@@ -584,6 +589,10 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 				}
 			}
 
+			if (!cline.activeToolContexts.has(toolCallId)) {
+				cline.activeToolContexts.set(toolCallId, { toolCallId, didReject: false })
+			}
+
 			// Store approval feedback to merge into tool result (GitHub #10465)
 			let approvalFeedback: { text: string; images?: string[] } | undefined
 
@@ -687,7 +696,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 					} else {
 						pushToolResult(formatResponse.toolDenied())
 					}
-					cline.didRejectTool = true
+					markToolRejected(cline, toolCallId)
 					return false
 				}
 
@@ -873,6 +882,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "update_todo_list":
@@ -880,6 +890,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "apply_diff":
@@ -888,6 +899,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "edit":
@@ -897,6 +909,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "search_replace":
@@ -905,6 +918,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "edit_file":
@@ -913,6 +927,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "apply_patch":
@@ -921,6 +936,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "read_file":
@@ -929,6 +945,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "list_files":
@@ -936,6 +953,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "codebase_search":
@@ -943,6 +961,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "search_files":
@@ -950,6 +969,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "execute_command":
@@ -957,6 +977,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "read_command_output":
@@ -964,6 +985,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "use_mcp_tool":
@@ -971,6 +993,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "access_mcp_resource":
@@ -978,6 +1001,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "ask_followup_question":
@@ -985,6 +1009,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "switch_mode":
@@ -992,6 +1017,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "new_task":
@@ -1000,7 +1026,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
-						toolCallId: block.id,
+						toolCallId,
 					})
 					break
 				case "attempt_completion": {
@@ -1010,7 +1036,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						pushToolResult,
 						askFinishSubTaskApproval,
 						toolDescription,
-						toolCallId: block.id,
+						toolCallId,
 					}
 					await attemptCompletionTool.handle(
 						cline,
@@ -1024,6 +1050,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "skill":
@@ -1031,6 +1058,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				case "generate_image":
@@ -1039,6 +1067,7 @@ async function presentAssistantMessageBlock(cline: Task, policySnapshot: Request
 						askApproval,
 						handleError,
 						pushToolResult,
+						toolCallId,
 					})
 					break
 				default: {
