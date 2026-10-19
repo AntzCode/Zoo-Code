@@ -2971,6 +2971,31 @@ describe("webviewMessageHandler - telemetrySetting", () => {
 	})
 })
 
+describe("webviewMessageHandler - collapseCommandOutputByDefault", () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
+
+	it.each([true, false, undefined])(
+		"persists the output collapse preference (%s) without changing terminal mode",
+		async (value) => {
+			await webviewMessageHandler(mockClineProvider, {
+				type: "updateSettings",
+				updatedSettings: { collapseCommandOutputByDefault: value },
+			})
+			expect(mockClineProvider.contextProxy.setValue).toHaveBeenCalledWith(
+				"collapseCommandOutputByDefault",
+				value,
+			)
+			expect(mockClineProvider.contextProxy.setValue).not.toHaveBeenCalledWith(
+				"terminalShellIntegrationDisabled",
+				expect.anything(),
+			)
+			expect(mockClineProvider.postStateToWebview).toHaveBeenCalledTimes(1)
+		},
+	)
+})
+
 describe("updateProfileModel", () => {
 	let updateProfileModel: Mock<ClineProvider["updateProfileModel"]>
 
